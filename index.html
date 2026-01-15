@@ -12,10 +12,14 @@
 </head>
 <body>
     <!-- Hidden audio element for background music -->
-    <audio id="background-music" loop>
-        <source src="Blue.mp3" type="audio/mpeg">
-        Your browser does not support the audio element.
-    </audio>
+   <audio id="background-music" loop preload="auto">
+    <source src="Blue.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+</audio>
+    <div id="music-preload-hint" style="display: none;">
+    Music is loading... Click anywhere to play!
+</div>
+
 
     <div class="cute">
         <div class="header-container">

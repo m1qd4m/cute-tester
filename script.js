@@ -4,6 +4,7 @@ class BackgroundMusic {
         this.audio = document.getElementById('background-music');
         this.volume = 0.3;
         this.isPlaying = false;
+        this.hasUserInteracted = false;
         
         // Check localStorage for saved volume
         const savedVolume = localStorage.getItem('cuteTestVolume');
@@ -18,7 +19,7 @@ class BackgroundMusic {
         
         // If music was playing on previous page, ensure it continues
         if (wasPlaying && this.audio) {
-            this.play();
+            setTimeout(() => this.play(), 100); // Small delay to ensure audio is ready
         }
     }
     
@@ -27,6 +28,9 @@ class BackgroundMusic {
         
         // Set initial volume
         this.audio.volume = this.volume;
+        
+        // Preload the audio
+        this.audio.preload = 'auto';
         
         // Save volume when it changes
         this.audio.addEventListener('volumechange', () => {
@@ -45,12 +49,31 @@ class BackgroundMusic {
             this.audio.currentTime = parseFloat(savedTime);
         }
         
-        // Try to autoplay
-        this.play();
+        // Try to autoplay with a small delay
+        setTimeout(() => {
+            this.tryAutoplay();
+        }, 500);
+        
+        // Add user interaction listeners
+        this.addInteractionListeners();
+    }
+    
+    tryAutoplay() {
+        if (!this.audio) return;
+        
+        // Check if autoplay is likely to succeed
+        if (this.hasUserInteracted || document.visibilityState === 'visible') {
+            this.play();
+        } else {
+            console.log("Waiting for user interaction to play music...");
+            
+            // Show a subtle hint (optional)
+            this.showMusicHint();
+        }
     }
     
     play() {
-        if (!this.audio) return;
+        if (!this.audio || this.isPlaying) return;
         
         const playPromise = this.audio.play();
         
@@ -58,21 +81,105 @@ class BackgroundMusic {
             playPromise.then(() => {
                 this.isPlaying = true;
                 console.log("Background music started playing");
+                this.hideMusicHint();
             }).catch(error => {
-                console.log("Autoplay prevented. User interaction required.");
+                console.log("Autoplay prevented:", error);
                 
-                // Setup click to play
-                const playOnClick = () => {
-                    this.audio.play().then(() => {
-                        this.isPlaying = true;
-                        document.removeEventListener('click', playOnClick);
-                        document.removeEventListener('touchstart', playOnClick);
-                    });
-                };
-                
-                document.addEventListener('click', playOnClick);
-                document.addEventListener('touchstart', playOnClick);
+                // Show a more prominent hint
+                this.showMusicHint(true);
             });
+        }
+    }
+    
+    addInteractionListeners() {
+        // Track user interaction
+        const interactionEvents = ['click', 'touchstart', 'keydown', 'mousedown'];
+        
+        interactionEvents.forEach(event => {
+            document.addEventListener(event, () => {
+                if (!this.hasUserInteracted) {
+                    this.hasUserInteracted = true;
+                    
+                    // Try to play after first interaction
+                    if (!this.isPlaying) {
+                        setTimeout(() => this.play(), 100);
+                    }
+                    
+                    // Remove listeners after first interaction
+                    interactionEvents.forEach(e => {
+                        document.removeEventListener(e, this.play);
+                    });
+                }
+            }, { once: true });
+        });
+        
+        // Also listen for page visibility changes
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible' && !this.isPlaying && this.hasUserInteracted) {
+                setTimeout(() => this.play(), 300);
+            }
+        });
+    }
+    
+    showMusicHint(forceShow = false) {
+        // Look for existing hint or create one
+        let hintElement = document.querySelector('.music-hint');
+        
+        if (!hintElement && (forceShow || Math.random() > 0.5)) {
+            hintElement = document.createElement('div');
+            hintElement.className = 'music-hint';
+            hintElement.innerHTML = `
+                <div style="
+                    position: fixed;
+                    bottom: 20px;
+                    right: 20px;
+                    background: rgba(255, 51, 102, 0.9);
+                    color: white;
+                    padding: 10px 15px;
+                    border-radius: 10px;
+                    font-family: 'Pixelify Sans', sans-serif;
+                    font-size: 14px;
+                    z-index: 9999;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    animation: pulse 2s infinite;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                ">
+                    <i class="fas fa-music"></i>
+                    Click anywhere to start music!
+                </div>
+            `;
+            
+            // Add click handler to the hint itself
+            hintElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.play();
+                this.hideMusicHint();
+            });
+            
+            document.body.appendChild(hintElement);
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                this.hideMusicHint();
+            }, 10000);
+        }
+    }
+    
+    hideMusicHint() {
+        const hintElement = document.querySelector('.music-hint');
+        if (hintElement) {
+            hintElement.style.opacity = '0';
+            hintElement.style.transform = 'translateY(20px)';
+            hintElement.style.transition = 'all 0.5s';
+            
+            setTimeout(() => {
+                if (hintElement.parentNode) {
+                    hintElement.parentNode.removeChild(hintElement);
+                }
+            }, 500);
         }
     }
     
@@ -89,7 +196,7 @@ class BackgroundMusic {
     }
 }
 
-// Initialize music when page loads
+// Initialize everything when page loads
 document.addEventListener('DOMContentLoaded', function() {
     // Start background music
     window.cuteBackgroundMusic = new BackgroundMusic();
@@ -171,6 +278,12 @@ style.textContent = `
             transform: scale(4);
             opacity: 0;
         }
+    }
+    
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+        100% { transform: scale(1); }
     }
 `;
 document.head.appendChild(style);
