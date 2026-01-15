@@ -11,14 +11,14 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Hidden audio element for background music -->
-   <audio id="background-music" loop preload="auto">
-    <source src="Blue.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-</audio>
-    <div id="music-preload-hint" style="display: none;">
-    Music is loading... Click anywhere to play!
-</div>
+     <!-- Audio should be first element -->
+    <audio id="background-music" loop preload="auto">
+        <source src="Blue.mp3" type="audio/mpeg">
+        <!-- Add fallback sources if needed -->
+        <source src="Blue.ogg" type="audio/ogg">
+        Your browser does not support the audio element.
+    </audio>
+    
 
 
     <div class="cute">

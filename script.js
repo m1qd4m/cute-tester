@@ -1,211 +1,241 @@
-// Background Music - Continuous playback across pages
-class BackgroundMusic {
+// Simple, reliable background music player
+class SimpleMusicPlayer {
     constructor() {
         this.audio = document.getElementById('background-music');
-        this.volume = 0.3;
         this.isPlaying = false;
-        this.hasUserInteracted = false;
+        this.hasStarted = false;
         
-        // Check localStorage for saved volume
-        const savedVolume = localStorage.getItem('cuteTestVolume');
-        if (savedVolume) {
-            this.volume = parseFloat(savedVolume);
+        if (!this.audio) {
+            console.error("Audio element not found!");
+            return;
         }
         
-        // Check if music was playing before
-        const wasPlaying = localStorage.getItem('cuteTestMusicPlaying') === 'true';
-        
-        this.init();
-        
-        // If music was playing on previous page, ensure it continues
-        if (wasPlaying && this.audio) {
-            setTimeout(() => this.play(), 100); // Small delay to ensure audio is ready
-        }
-    }
-    
-    init() {
-        if (!this.audio) return;
-        
-        // Set initial volume
-        this.audio.volume = this.volume;
+        // Set volume to 30%
+        this.audio.volume = 0.3;
         
         // Preload the audio
         this.audio.preload = 'auto';
         
-        // Save volume when it changes
-        this.audio.addEventListener('volumechange', () => {
-            localStorage.setItem('cuteTestVolume', this.audio.volume.toString());
+        // Mark when audio can play
+        this.audio.addEventListener('canplaythrough', () => {
+            console.log("Audio is ready to play");
+            this.tryToPlay();
         });
         
-        // Save playing state before page unload
+        // Handle errors
+        this.audio.addEventListener('error', (e) => {
+            console.error("Audio error:", e);
+            console.error("Audio error details:", this.audio.error);
+        });
+        
+        // Start playing when page loads
+        window.addEventListener('load', () => {
+            setTimeout(() => this.tryToPlay(), 100);
+        });
+        
+        // Play on any user interaction
+        this.setupInteractionListeners();
+        
+        // Save state before leaving page
         window.addEventListener('beforeunload', () => {
-            localStorage.setItem('cuteTestMusicPlaying', this.isPlaying.toString());
-            localStorage.setItem('cuteTestCurrentTime', this.audio.currentTime.toString());
+            if (this.isPlaying) {
+                localStorage.setItem('musicIsPlaying', 'true');
+                localStorage.setItem('musicTime', this.audio.currentTime);
+            }
         });
         
-        // Try to resume from saved time
-        const savedTime = localStorage.getItem('cuteTestCurrentTime');
-        if (savedTime) {
+        // Restore state if coming from another page
+        this.restoreState();
+    }
+    
+    restoreState() {
+        // Check if music was playing on previous page
+        const wasPlaying = localStorage.getItem('musicIsPlaying') === 'true';
+        const savedTime = localStorage.getItem('musicTime');
+        
+        if (wasPlaying && savedTime) {
             this.audio.currentTime = parseFloat(savedTime);
-        }
-        
-        // Try to autoplay with a small delay
-        setTimeout(() => {
-            this.tryAutoplay();
-        }, 500);
-        
-        // Add user interaction listeners
-        this.addInteractionListeners();
-    }
-    
-    tryAutoplay() {
-        if (!this.audio) return;
-        
-        // Check if autoplay is likely to succeed
-        if (this.hasUserInteracted || document.visibilityState === 'visible') {
-            this.play();
-        } else {
-            console.log("Waiting for user interaction to play music...");
-            
-            // Show a subtle hint (optional)
-            this.showMusicHint();
+            this.isPlaying = true;
+            this.hasStarted = true;
         }
     }
     
-    play() {
-        if (!this.audio || this.isPlaying) return;
+    setupInteractionListeners() {
+        const events = ['click', 'touchstart', 'keydown', 'mousedown'];
+        
+        events.forEach(event => {
+            document.addEventListener(event, () => {
+                if (!this.hasStarted && this.audio.readyState >= 2) {
+                    this.play();
+                }
+            }, { once: true });
+        });
+    }
+    
+    tryToPlay() {
+        // Don't try if already playing or if audio isn't ready
+        if (this.isPlaying || this.audio.readyState < 2) return;
         
         const playPromise = this.audio.play();
         
         if (playPromise !== undefined) {
             playPromise.then(() => {
                 this.isPlaying = true;
-                console.log("Background music started playing");
-                this.hideMusicHint();
+                this.hasStarted = true;
+                console.log("Music started playing successfully");
+                this.showPlayingIndicator();
             }).catch(error => {
-                console.log("Autoplay prevented:", error);
-                
-                // Show a more prominent hint
-                this.showMusicHint(true);
+                console.log("Autoplay blocked, waiting for user interaction");
+                this.showPlayHint();
             });
         }
     }
     
-    addInteractionListeners() {
-        // Track user interaction
-        const interactionEvents = ['click', 'touchstart', 'keydown', 'mousedown'];
+    play() {
+        if (this.isPlaying) return;
         
-        interactionEvents.forEach(event => {
-            document.addEventListener(event, () => {
-                if (!this.hasUserInteracted) {
-                    this.hasUserInteracted = true;
-                    
-                    // Try to play after first interaction
-                    if (!this.isPlaying) {
-                        setTimeout(() => this.play(), 100);
-                    }
-                    
-                    // Remove listeners after first interaction
-                    interactionEvents.forEach(e => {
-                        document.removeEventListener(e, this.play);
-                    });
-                }
-            }, { once: true });
-        });
-        
-        // Also listen for page visibility changes
-        document.addEventListener('visibilitychange', () => {
-            if (document.visibilityState === 'visible' && !this.isPlaying && this.hasUserInteracted) {
-                setTimeout(() => this.play(), 300);
-            }
+        this.audio.play().then(() => {
+            this.isPlaying = true;
+            this.hasStarted = true;
+            console.log("Music started after user interaction");
+            this.showPlayingIndicator();
+            this.hidePlayHint();
+            
+            // Save that music is now playing
+            localStorage.setItem('musicIsPlaying', 'true');
+        }).catch(error => {
+            console.error("Failed to play music:", error);
         });
     }
     
-    showMusicHint(forceShow = false) {
-        // Look for existing hint or create one
-        let hintElement = document.querySelector('.music-hint');
+    showPlayHint() {
+        // Remove any existing hint
+        this.hidePlayHint();
         
-        if (!hintElement && (forceShow || Math.random() > 0.5)) {
-            hintElement = document.createElement('div');
-            hintElement.className = 'music-hint';
-            hintElement.innerHTML = `
-                <div style="
-                    position: fixed;
-                    bottom: 20px;
-                    right: 20px;
-                    background: rgba(255, 51, 102, 0.9);
-                    color: white;
-                    padding: 10px 15px;
-                    border-radius: 10px;
-                    font-family: 'Pixelify Sans', sans-serif;
-                    font-size: 14px;
-                    z-index: 9999;
-                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-                    animation: pulse 2s infinite;
-                    cursor: pointer;
-                    display: flex;
-                    align-items: center;
-                    gap: 8px;
-                ">
-                    <i class="fas fa-music"></i>
-                    Click anywhere to start music!
-                </div>
-            `;
-            
-            // Add click handler to the hint itself
-            hintElement.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.play();
-                this.hideMusicHint();
-            });
-            
-            document.body.appendChild(hintElement);
-            
-            // Auto-hide after 10 seconds
-            setTimeout(() => {
-                this.hideMusicHint();
-            }, 10000);
-        }
+        // Create hint element
+        const hint = document.createElement('div');
+        hint.id = 'music-play-hint';
+        hint.innerHTML = `
+            <div style="
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: #ff3366;
+                color: white;
+                padding: 12px 18px;
+                border-radius: 12px;
+                font-family: 'Pixelify Sans', sans-serif;
+                font-size: 14px;
+                z-index: 10000;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                animation: pulse-hint 1.5s infinite;
+                border: 2px solid white;
+            ">
+                <i class="fas fa-play-circle" style="font-size: 18px;"></i>
+                Click to play music
+            </div>
+        `;
+        
+        // Add click handler
+        hint.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.play();
+        });
+        
+        document.body.appendChild(hint);
+        
+        // Auto-remove after 15 seconds
+        setTimeout(() => this.hidePlayHint(), 15000);
     }
     
-    hideMusicHint() {
-        const hintElement = document.querySelector('.music-hint');
-        if (hintElement) {
-            hintElement.style.opacity = '0';
-            hintElement.style.transform = 'translateY(20px)';
-            hintElement.style.transition = 'all 0.5s';
+    hidePlayHint() {
+        const hint = document.getElementById('music-play-hint');
+        if (hint) {
+            hint.style.opacity = '0';
+            hint.style.transform = 'translateY(20px)';
+            hint.style.transition = 'all 0.5s';
             
             setTimeout(() => {
-                if (hintElement.parentNode) {
-                    hintElement.parentNode.removeChild(hintElement);
+                if (hint.parentNode) {
+                    hint.parentNode.removeChild(hint);
                 }
             }, 500);
         }
     }
     
-    pause() {
-        if (!this.audio) return;
-        this.audio.pause();
-        this.isPlaying = false;
+    showPlayingIndicator() {
+        // Remove any existing indicator
+        this.hidePlayingIndicator();
+        
+        // Create playing indicator
+        const indicator = document.createElement('div');
+        indicator.id = 'music-playing-indicator';
+        indicator.innerHTML = `
+            <div style="
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: rgba(76, 175, 80, 0.9);
+                color: white;
+                padding: 8px 15px;
+                border-radius: 10px;
+                font-family: 'Pixelify Sans', sans-serif;
+                font-size: 13px;
+                z-index: 9999;
+                box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                border: 2px solid white;
+            ">
+                <i class="fas fa-music" style="font-size: 16px;"></i>
+                Music is playing
+            </div>
+        `;
+        
+        document.body.appendChild(indicator);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => this.hidePlayingIndicator(), 3000);
     }
     
-    setVolume(level) {
-        if (!this.audio) return;
-        this.audio.volume = Math.max(0, Math.min(1, level));
-        this.volume = this.audio.volume;
+    hidePlayingIndicator() {
+        const indicator = document.getElementById('music-playing-indicator');
+        if (indicator) {
+            indicator.style.opacity = '0';
+            indicator.style.transition = 'opacity 0.5s';
+            
+            setTimeout(() => {
+                if (indicator.parentNode) {
+                    indicator.parentNode.removeChild(indicator);
+                }
+            }, 500);
+        }
     }
 }
 
-// Initialize everything when page loads
+// Initialize music player
 document.addEventListener('DOMContentLoaded', function() {
-    // Start background music
-    window.cuteBackgroundMusic = new BackgroundMusic();
+    // Start the music player
+    window.musicPlayer = new SimpleMusicPlayer();
     
-    // Add interactive elements to the main page
+    // Add interactive elements
     addInteractiveElements();
+    
+    // Check if we should auto-play based on previous state
+    setTimeout(() => {
+        const wasPlaying = localStorage.getItem('musicIsPlaying') === 'true';
+        if (wasPlaying && window.musicPlayer && !window.musicPlayer.isPlaying) {
+            window.musicPlayer.play();
+        }
+    }, 500);
 });
 
-// Add interactive elements to the main page
+// Add interactive elements
 function addInteractiveElements() {
     // Add click effects to buttons
     const buttons = document.querySelectorAll('button');
@@ -234,14 +264,11 @@ function addInteractiveElements() {
             
             this.appendChild(ripple);
             
-            // Remove ripple element after animation
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
+            setTimeout(() => ripple.remove(), 600);
         });
     });
     
-    // Add a fun message when hovering over the title
+    // Title hover effect
     const title = document.querySelector('h1');
     if (title) {
         title.addEventListener('mouseenter', function() {
@@ -254,23 +281,28 @@ function addInteractiveElements() {
         });
     }
     
-    // Create more floating hearts dynamically
-    const floatingHearts = document.querySelector('.floating-hearts');
-    if (floatingHearts) {
-        const heartCount = window.innerWidth < 768 ? 5 : 10;
-        for (let i = 0; i < heartCount; i++) {
-            const heart = document.createElement('div');
-            heart.classList.add('heart');
-            heart.innerHTML = ['❤️', '💖', '💗', '💕', '💞', '💓', '💝'][Math.floor(Math.random() * 7)];
-            heart.style.left = `${Math.random() * 100}%`;
-            heart.style.animationDelay = `${Math.random() * 5}s`;
-            heart.style.fontSize = `${Math.random() * 15 + 10}px`;
-            floatingHearts.appendChild(heart);
-        }
+    // Add floating hearts
+    addFloatingHearts();
+}
+
+// Add floating hearts
+function addFloatingHearts() {
+    const container = document.querySelector('.floating-hearts');
+    if (!container) return;
+    
+    const heartCount = window.innerWidth < 768 ? 5 : 10;
+    for (let i = 0; i < heartCount; i++) {
+        const heart = document.createElement('div');
+        heart.classList.add('heart');
+        heart.innerHTML = ['❤️', '💖', '💗', '💕', '💞'][Math.floor(Math.random() * 5)];
+        heart.style.left = `${Math.random() * 100}%`;
+        heart.style.animationDelay = `${Math.random() * 5}s`;
+        heart.style.fontSize = `${Math.random() * 15 + 10}px`;
+        container.appendChild(heart);
     }
 }
 
-// Add the ripple animation to the styles
+// Add styles
 const style = document.createElement('style');
 style.textContent = `
     @keyframes ripple-animation {
@@ -280,7 +312,7 @@ style.textContent = `
         }
     }
     
-    @keyframes pulse {
+    @keyframes pulse-hint {
         0% { transform: scale(1); }
         50% { transform: scale(1.05); }
         100% { transform: scale(1); }
