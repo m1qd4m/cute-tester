@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're Cute!</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cause:wght@200&family=Dancing+Script:wght@400..700&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&family=Pixelify+Sans:wght@400..700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .yes-page {
+            background: linear-gradient(135deg, #f76b8a, #ff9a9e);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 15px;
+            text-align: center;
+            font-family: "Dancing Script", cursive;
+        }
+        
+        .yes-container {
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 95%;
+            width: 800px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            margin: 15px;
+            border: 5px solid #ffcab0;
+            box-sizing: border-box;
+        }
+        
+        .yes-title {
+            color: #ff3366;
+            font-size: 2.2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .yes-message {
+            background-color: #fff9f9;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border-left: 8px solid #ff3366;
+            box-shadow: inset 0 0 10px rgba(255, 182, 193, 0.3);
+            text-align: left;
+        }
+        
+        .yes-message p {
+            font-size: 1.3rem;
+            line-height: 1.5;
+            color: #555;
+            margin-bottom: 15px;
+        }
+        
+        .praise-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            margin: 25px 0;
+        }
+        
+        .praise-item {
+            background: linear-gradient(to right, #ffdde1, #ffccd5);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            background: #ff3366;
+            color: white;
+            padding: 12px 25px;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            text-decoration: none;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.4);
+            font-family: "Pixelify Sans", sans-serif;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-3px);
+            background: #ff0040;
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.6);
+        }
+        
+        .cute-facts {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff0f5;
+            border-radius: 12px;
+            border: 3px dashed #ffb6c1;
+        }
+        
+        .cute-facts h3 {
+            color: #ff3366;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .yes-container {
+                padding: 15px;
+            }
+            
+            .yes-title {
+                font-size: 1.8rem;
+                gap: 10px;
+            }
+            
+            .yes-message {
+                padding: 15px;
+            }
+            
+            .yes-message p {
+                font-size: 1.1rem;
+            }
+            
+            .praise-list {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+                gap: 10px;
+            }
+            
+            .praise-item {
+                font-size: 1rem;
+                padding: 10px;
+            }
+            
+            .back-button {
+                padding: 10px 20px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .yes-title {
+                font-size: 1.5rem;
+                flex-direction: column;
+            }
+            
+            .yes-message p {
+                font-size: 1rem;
+            }
+            
+            .praise-list {
+                grid-template-columns: 1fr;
+            }
+            
+            .cute-facts h3 {
+                font-size: 1.3rem;
+            }
+            
+            .back-button {
+                width: 100%;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body class="yes-page">
+    <!-- Hidden audio element for background music -->
+    <audio id="background-music" loop>
+        <source src="../Blue.mp3" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <div class="yes-container">
+        <div class="yes-title">
+            <i class="fas fa-star"></i> CORRECT ANSWER! <i class="fas fa-star"></i>
+        </div>
+        
+        <p style="font-size: 1.5rem; color: #ff3366; margin-bottom: 10px;">
+            <i class="fas fa-check-circle"></i> You know you're cute! 
+        </p>
+        
+        <div class="yes-message">
+            <p>Okay, so you already know you're cute. That's great self-awareness! But let me tell you something...</p>
+            
+            <p>Why are you <strong>THIS</strong> cute? It's almost illegal to be this adorable! Your cuteness level is off the charts, breaking all known scales and measurements. Scientists are baffled, puppies get jealous, and rainbows seem dull in comparison!</p>
+            
+            <p>Every time you smile, somewhere in the world a flower blooms just to try to match your beauty. When you laugh, it's like a symphony of joy that makes even the grumpiest people crack a smile. Your existence alone probably increases the world's average happiness by at least 15%!</p>
+        </div>
+        
+        <h2 style="color: #ff3366; font-size: 1.7rem; margin-top: 20px;">
+            <i class="fas fa-heart"></i> Ab kia kia tareef krun mai🙄 <i class="fas fa-heart"></i>
+        </h2>
+        
+        <div class="praise-list">
+            <div class="praise-item"><i class="fas fa-heart"></i> Your smile 😭</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> You make baby animals look average</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> Your cuteness should have warning labels</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> Sunflowers turn to face YOU</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> Samjh hi nh araha kia boloun</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> Your laugh is soo uff</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> Kittens study your photos to learn cute</div>
+            <div class="praise-item"><i class="fas fa-heart"></i> You probably glow in the dark (from cuteness)</div>
+        </div>
+        
+        <div class="cute-facts">
+            <h3><i class="fas fa-lightbulb"></i> Cute Facts About You:</h3>
+            <p style="font-size: 1.1rem; color: #555; text-align: center; line-height: 1.5;">
+                • You just made this website 87% cutter by visiting<br>
+                • The "Cute Police" would arrest you for excessive adorableness<br>
+                • Your presence makes everything around you 30% more enjoyable
+            </p>
+        </div>
+        
+        <a href="../index.html" class="back-button">
+            <i class="fas fa-arrow-left"></i> Back to Cute Test
+        </a>
+    </div>
+    
+    <script src="../script.js"></script>
+</body>
+</html>

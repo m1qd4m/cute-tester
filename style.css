@@ -1,0 +1,295 @@
+body {
+    background: #f76b8a;
+    text-align: center;
+    font-family: "Pixelify Sans", sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.cute {
+    background-color: rgba(255, 255, 255, 0.15);
+    padding: 20px;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+    max-width: 90%;
+    width: 800px;
+    margin: 15px;
+    position: relative;
+    z-index: 10;
+}
+
+.header-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.heart-icon {
+    font-size: 28px;
+    color: #ff3366;
+    animation: pulse 1.5s infinite alternate;
+}
+
+h1 {
+    font-size: 2.5rem;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    margin: 0;
+    letter-spacing: 1px;
+    line-height: 1.2;
+}
+
+.subtitle {
+    font-size: 1.5rem;
+    color: #ffebb7;
+    margin-bottom: 30px;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    line-height: 1.3;
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 25px;
+}
+
+.btn-link {
+    text-decoration: none;
+    width: 100%;
+    max-width: 250px;
+}
+
+button {
+    font-family: "Pixelify Sans", sans-serif;
+    font-weight: 600;
+    border: none;
+    color: #ff3366;
+    background: #ffcab0;
+    border-radius: 15px;
+    text-align: center;
+    box-shadow: inset 0 0 8px #ce9898, 0 5px 15px rgba(0, 0, 0, 0.2);
+    font-size: 1.4rem;
+    cursor: pointer;
+    padding: 15px 25px;
+    transition: all 0.3s ease;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 70px;
+}
+
+button:hover {
+    transform: translateY(-5px) scale(1.05);
+    background: #eecbbb;
+    color: white;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+}
+
+.hmm:hover {
+    background: #a8e6cf;
+    color: #2d8f6d;
+}
+
+.mm:hover {
+    background: #ffaaa7;
+    color: #9d2933;
+}
+
+.hint {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 12px;
+    border-radius: 10px;
+    display: inline-block;
+    margin-top: 15px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.hint p {
+    margin: 8px 0;
+    font-size: 1rem;
+    color: #fff9e6;
+    line-height: 1.4;
+}
+
+.hint i {
+    color: #ffeb3b;
+    margin-right: 8px;
+}
+
+/* Floating hearts animation */
+.floating-hearts {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.heart {
+    position: absolute;
+    font-size: 20px;
+    opacity: 0;
+    animation: float 8s linear infinite;
+}
+
+.heart:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.heart:nth-child(2) {
+    top: 20%;
+    left: 80%;
+    animation-delay: 1s;
+}
+
+.heart:nth-child(3) {
+    top: 60%;
+    left: 15%;
+    animation-delay: 2s;
+}
+
+.heart:nth-child(4) {
+    top: 70%;
+    left: 75%;
+    animation-delay: 3s;
+}
+
+.heart:nth-child(5) {
+    top: 40%;
+    left: 50%;
+    animation-delay: 4s;
+}
+
+/* Animations */
+@keyframes pulse {
+    0% { transform: scale(1); }
+    100% { transform: scale(1.2); }
+}
+
+@keyframes float {
+    0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .cute {
+        padding: 15px;
+        margin: 10px;
+        max-width: 95%;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .subtitle {
+        font-size: 1.3rem;
+        margin-bottom: 20px;
+    }
+    
+    button {
+        font-size: 1.2rem;
+        padding: 12px 20px;
+        min-height: 60px;
+    }
+    
+    .button-container {
+        gap: 15px;
+    }
+    
+    .heart-icon {
+        font-size: 24px;
+    }
+    
+    .hint p {
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    h1 {
+        font-size: 1.8rem;
+        text-align: center;
+    }
+    
+    .subtitle {
+        font-size: 1.1rem;
+    }
+    
+    button {
+        font-size: 1.1rem;
+        padding: 10px 15px;
+        min-height: 55px;
+    }
+    
+    .btn-link {
+        max-width: 100%;
+    }
+    
+    .heart {
+        font-size: 16px;
+    }
+    
+    .hint {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 350px) {
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .subtitle {
+        font-size: 1rem;
+    }
+    
+    button {
+        font-size: 1rem;
+        padding: 8px 12px;
+    }
+    
+    .button-container {
+        flex-direction: column;
+        align-items: center;
+    }
+}
